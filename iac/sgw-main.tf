@@ -121,11 +121,11 @@ resource "azurerm_virtual_machine" "single-gateway-vm-instance" {
     admin_username = module.common.admin_username
     admin_password = module.common.admin_password
     custom_data = templatefile("${path.module}/sgw-init.sh", {
-      installation_type              = module.common.installation_type
+      installation_type              = var.gw_installation_type
       allow_upload_download          = module.common.allow_upload_download
       os_version                     = module.common.os_version
-      template_name                  = module.common.template_name
-      template_version               = module.common.template_version
+      template_name                  = var.gw_template_name
+      template_version               = var.gw_template_version
       template_type                  = "terraform"
       is_blink                       = module.common.is_blink
       bootstrap_script64             = base64encode(var.bootstrap_script)
