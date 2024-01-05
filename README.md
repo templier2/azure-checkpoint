@@ -1,1 +1,1 @@
-# azure-checkpoint
+iac folder contains all terraform files required fo deploy. It is partly compatible with \management-new-vnet folder, all other files contains other deployment's parts.
