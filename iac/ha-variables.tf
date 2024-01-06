@@ -128,14 +128,14 @@ resource "null_resource" "sic_key_invalid" {
 
 variable "ha_template_name" {
   description = "Template name. Should be defined according to deployment type(ha, vmss)"
-  type = string
-  default = "ha_terraform"
+  type        = string
+  default     = "ha_terraform"
 }
 
 variable "ha_template_version" {
   description = "Template version. It is reccomended to always use the latest template version"
-  type = string
-  default = "20210111"
+  type        = string
+  default     = "20210111"
 }
 
 variable "ha_installation_type" {

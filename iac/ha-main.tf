@@ -364,7 +364,7 @@ resource "azurerm_virtual_machine" "vm-instance-availability-zone" {
     azurerm_network_interface.ha-nic.id,
   azurerm_network_interface.ha-nic1.1.id]
   delete_os_disk_on_termination = module.common.delete_os_disk_on_termination
-  primary_network_interface_id  = count.index == 0 ? azurerm_network_interface.nic_vip.id : azurerm_network_interface.nic.id
+  primary_network_interface_id  = count.index == 0 ? azurerm_network_interface.nic_vip.id : azurerm_network_interface.ha-nic.id
   identity {
     type = module.common.vm_instance_identity
   }

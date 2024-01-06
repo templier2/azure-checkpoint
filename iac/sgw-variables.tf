@@ -63,18 +63,18 @@ variable "enable_custom_metrics" {
 
 variable "gw_installation_type" {
   description = "installation type"
-  type = string
-  default = "gateway"
+  type        = string
+  default     = "gateway"
 }
 
 variable "gw_template_name" {
   description = "Template name. Should be defined according to deployment type(mgmt, ha, vmss, sg)"
-  type = string
-  default = "single"
+  type        = string
+  default     = "single"
 }
 
 variable "gw_template_version" {
   description = "Template version. It is recommended to always use the latest template version"
-  type = string
-  default = "20230629"
+  type        = string
+  default     = "20230629"
 }
