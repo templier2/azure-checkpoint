@@ -6,8 +6,8 @@ module "gw-vnet" {
   resource_group_name = module.common.resource_group_name
   location            = module.common.resource_group_location
   address_space       = var.gw_address_space
-  subnet_prefixes     = [var.frontend_subnet_prefix, var.backend_subnet_prefix]
-  subnet_names        = ["${var.single_gateway_name}-frontend-subnet", "${var.single_gateway_name}-backend-subnet"]
+  subnet_prefixes     = [var.frontend_subnet_prefix, var.backend_subnet_prefix, var.second_frontend_subnet_prefix]
+  subnet_names        = ["${var.single_gateway_name}-frontend-subnet", "${var.single_gateway_name}-backend-subnet", "${var.single_gateway_name}-second-frontend-subnet"]
   nsg_id              = module.gw-network-security-group.network_security_group_id
 }
 
@@ -81,7 +81,41 @@ resource "azurerm_network_interface" "gw-nic1" {
     private_ip_address            = cidrhost(var.backend_subnet_prefix, 4)
   }
 }
+//********************** Third network adapter for single gateway **************************//
+resource "azurerm_public_ip" "gw-public-ip2" {
+  name                    = "${var.single_gateway_name}-ip2"
+  location                = module.common.resource_group_location
+  resource_group_name     = module.common.resource_group_name
+  allocation_method       = var.vnet_allocation_method
+  idle_timeout_in_minutes = 30
+  domain_name_label = join("", [
+    lower(var.single_gateway_name), "1",
+    "-",
+  random_id.randomId.hex])
+}
 
+resource "azurerm_network_interface_security_group_association" "gw-security_group_association2" {
+  depends_on                = [azurerm_network_interface.gw-nic2, module.gw-network-security-group.network_security_group_id]
+  network_interface_id      = azurerm_network_interface.gw-nic2.id
+  network_security_group_id = module.gw-network-security-group.network_security_group_id
+}
+
+resource "azurerm_network_interface" "gw-nic2" {
+  depends_on = [
+  azurerm_public_ip.gw-public-ip2]
+  name                 = "${var.single_gateway_name}-eth2"
+  location             = module.common.resource_group_location
+  resource_group_name  = module.common.resource_group_name
+  enable_ip_forwarding = false
+
+  ip_configuration {
+    name                          = "ipconfig3"
+    subnet_id                     = module.gw-vnet.vnet_subnets[2]
+    private_ip_address_allocation = var.vnet_allocation_method
+    private_ip_address            = cidrhost(var.second_frontend_subnet_prefix, 4)
+    public_ip_address_id          = azurerm_public_ip.gw-public-ip2.id
+  }
+}
 //********************** Virtual Machines **************************//
 resource "azurerm_virtual_machine" "single-gateway-vm-instance" {
   depends_on = [
@@ -91,7 +125,8 @@ resource "azurerm_virtual_machine" "single-gateway-vm-instance" {
   name     = var.single_gateway_name
   network_interface_ids = [
     azurerm_network_interface.gw-nic.id,
-  azurerm_network_interface.gw-nic1.id]
+    azurerm_network_interface.gw-nic1.id,
+  azurerm_network_interface.gw-nic2.id]
   resource_group_name           = module.common.resource_group_name
   vm_size                       = var.single_gateway_vm_size
   delete_os_disk_on_termination = module.common.delete_os_disk_on_termination
