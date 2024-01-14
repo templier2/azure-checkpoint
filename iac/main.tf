@@ -263,7 +263,8 @@ resource "azurerm_virtual_machine" "mgmt-vm-instance" {
       template_version               = module.common.template_version
       template_type                  = "terraform"
       is_blink                       = module.common.is_blink
-      bootstrap_script64             = base64encode(var.bootstrap_script)
+      # bootstrap_script64             = base64encode("clish -c 'set user admin shell /bin/bash' -s;config_system -s 'install_security_gw=false&install_ppak=false&gateway_cluster_member=false&install_security_managment=true&install_mgmt_primary=true&install_mgmt_secondary=false&download_info=true&hostname=${var.mgmt_name}&mgmt_gui_clients_radio=any&mgmt_admin_radio=gaia_admin&maintenance_hash=${var.maintenance_mode_password_hash}'")
+      bootstrap_script64             = ""
       location                       = module.common.resource_group_location
       management_GUI_client_network  = var.management_GUI_client_network
       enable_api                     = var.mgmt_enable_api

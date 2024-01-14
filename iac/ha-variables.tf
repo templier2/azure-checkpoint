@@ -112,6 +112,7 @@ variable "is_blink" {
   description = "Define if blink image is used for deployment"
   default     = true
 }
+
 variable "smart_1_cloud_token_a" {
   description = "Smart-1 Cloud Token, for configuring member A"
   type        = string

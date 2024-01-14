@@ -78,3 +78,8 @@ variable "gw_template_version" {
   type        = string
   default     = "20230629"
 }
+
+variable "gw_netmask_length" {
+  description = "Length of netmask for all Single Gateway Subnets"
+  type        = string
+}

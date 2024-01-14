@@ -8,9 +8,5 @@ terraform {
     random = {
       version = "~> 2.2.1"
     }
-    checkpoint = {
-      source  = "CheckPointSW/checkpoint"
-      version = "~> 2.6.0"
-    }
   }
 }
