@@ -9,6 +9,11 @@ variable "second_frontend_subnet_prefix" {
 }
 
 resource "azurerm_subnet" "apache" {
+  depends_on = [
+    azurerm_virtual_machine.vm-instance-availability-zone,
+    azurerm_virtual_machine.vm-instance-availability-set,
+    azurerm_virtual_machine.single-gateway-vm-instance
+  ]
   name                 = "Office-Subnet"
   resource_group_name  = module.common.resource_group_name
   virtual_network_name = module.ha-vnet.vnet_name
@@ -16,6 +21,11 @@ resource "azurerm_subnet" "apache" {
 }
 
 resource "azurerm_network_interface" "apache" {
+  depends_on = [
+    azurerm_virtual_machine.vm-instance-availability-zone,
+    azurerm_virtual_machine.vm-instance-availability-set,
+    azurerm_virtual_machine.single-gateway-vm-instance
+  ]
   count               = 2
   name                = "apache${count.index + 1}"
   location            = module.common.resource_group_location
@@ -29,66 +39,66 @@ resource "azurerm_network_interface" "apache" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "ha_subnet3" {
-  subnet_id = azurerm_subnet.apache.id
+  subnet_id                 = azurerm_subnet.apache.id
   network_security_group_id = module.ha-network-security-group.network_security_group_id
 }
 
 resource "azurerm_route_table" "ha_subnet3" {
-  name = "${var.cluster_name}-subnet3-route"
-  location = var.location
+  name                = "${var.cluster_name}-subnet3-route"
+  location            = var.location
   resource_group_name = var.resource_group_name
 
   route {
-    name = "Local-Subnet"
+    name           = "Local-Subnet"
     address_prefix = azurerm_subnet.apache.address_prefixes[0]
-    next_hop_type = "VnetLocal"
+    next_hop_type  = "VnetLocal"
   }
   route {
-    name = "To-Out"
-    address_prefix = "0.0.0.0/0"
-    next_hop_type = "VirtualAppliance"
+    name                   = "To-Out"
+    address_prefix         = "0.0.0.0/0"
+    next_hop_type          = "VirtualAppliance"
     next_hop_in_ip_address = azurerm_lb.backend-lb.private_ip_address
   }
 }
 
 resource "azurerm_subnet_route_table_association" "ha_subnet3" {
-  subnet_id = azurerm_subnet.apache.id
+  subnet_id      = azurerm_subnet.apache.id
   route_table_id = azurerm_route_table.ha_subnet3.id
 }
 
-resource "azurerm_linux_virtual_machine" "apache" {
+resource "azurerm_virtual_machine" "apache" {
   depends_on = [
     azurerm_virtual_machine.vm-instance-availability-zone,
     azurerm_virtual_machine.vm-instance-availability-set,
     azurerm_virtual_machine.single-gateway-vm-instance
   ]
-  count               = 2
-  name                = "apache${count.index + 1}"
-  location            = module.common.resource_group_location
-  resource_group_name = module.common.resource_group_name
-  size                = "Standard_B1ls"
-  admin_username      = "${var.admin_username}-user"
-  admin_password      = var.admin_password
-  disable_password_authentication = false
-  network_interface_ids = [
-    azurerm_network_interface.apache[count.index].id,
-  ]
+  count                         = 2
+  name                          = "apache${count.index + 1}"
+  location                      = module.common.resource_group_location
+  resource_group_name           = module.common.resource_group_name
+  vm_size                       = "Standard_B1ls"
+  network_interface_ids         = [azurerm_network_interface.apache[count.index].id]
+  delete_os_disk_on_termination = true
 
-  os_disk {
-    caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
-  }
-
-  source_image_reference {
+  storage_image_reference {
     publisher = "bitnami"
     offer     = "tom-cat"
     sku       = "7-0"
     version   = "latest"
   }
-  plan {
-    publisher = "bitnami"
-    product = "tom-cat"
-    name = "7-0"
+  storage_os_disk {
+    name              = "myosdisk1"
+    caching           = "ReadWrite"
+    create_option     = "FromImage"
+    managed_disk_type = "Standard_LRS"
+  }
+  os_profile {
+    computer_name  = "apache${count.index + 1}"
+    admin_username = "${var.admin_username}-user"
+    admin_password = var.admin_password
+  }
+  os_profile_linux_config {
+    disable_password_authentication = false
   }
 }
 

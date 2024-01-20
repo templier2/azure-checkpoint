@@ -7,6 +7,5 @@ All values were merged to the terraform.tfvars.
 
 Note: default admin shell is changed to /bin/bash (it is needed for gateways' import).
 
-Apache VMs need to be checked, currently it is unavailable from Interne.
 After first deployment step mgmt_import_gw will fail.
 You have to wait approx 20 minutes before running it again.

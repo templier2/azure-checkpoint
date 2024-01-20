@@ -1,6 +1,6 @@
 //********************** Networking **************************//
 module "gw-vnet" {
-  source = "../modules/vnet"
+  source     = "../modules/vnet"
 
   vnet_name           = var.gw_vnet_name
   resource_group_name = module.common.resource_group_name
@@ -118,30 +118,30 @@ resource "azurerm_network_interface" "gw-nic2" {
 }
 
 resource "azurerm_subnet_network_security_group_association" "sgw_subnet3" {
-  depends_on = [module.gw-vnet]
-  subnet_id = module.gw-vnet.vnet_subnets[2]
+  depends_on                = [module.gw-vnet]
+  subnet_id                 = module.gw-vnet.vnet_subnets[2]
   network_security_group_id = module.gw-network-security-group.network_security_group_id
 }
 
 resource "azurerm_route_table" "sgw_subnet3" {
-  name = "${var.single_gateway_name}-subnet3-route"
-  location = var.location
+  name                = "${var.single_gateway_name}-subnet3-route"
+  location            = var.location
   resource_group_name = var.resource_group_name
 
   route {
-    name = "Local-Subnet"
+    name           = "Local-Subnet"
     address_prefix = module.gw-vnet.subnet_prefixes[2]
-    next_hop_type = "VnetLocal"
+    next_hop_type  = "VnetLocal"
   }
   route {
-    name = "To-Internal"
+    name           = "To-Internal"
     address_prefix = var.gw_address_space
-    next_hop_type = "None"
+    next_hop_type  = "None"
   }
 }
 
 resource "azurerm_subnet_route_table_association" "sgw_subnet3" {
-  subnet_id = module.gw-vnet.vnet_subnets[2]
+  subnet_id      = module.gw-vnet.vnet_subnets[2]
   route_table_id = azurerm_route_table.sgw_subnet3.id
 }
 //********************** Virtual Machines **************************//
@@ -149,7 +149,7 @@ resource "azurerm_virtual_machine" "single-gateway-vm-instance" {
   depends_on = [
     azurerm_network_interface.gw-nic,
     azurerm_network_interface.gw-nic1,
-    azurerm_network_interface.gw-nic2]
+  azurerm_network_interface.gw-nic2]
   location = module.common.resource_group_location
   name     = var.single_gateway_name
   network_interface_ids = [

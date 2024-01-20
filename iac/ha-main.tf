@@ -39,7 +39,6 @@ resource "azurerm_public_ip_prefix" "public_ip_prefix" {
 }
 
 resource "azurerm_public_ip" "ha-public-ip" {
-  #why two?  
   count               = 2
   name                = "${var.cluster_name}${count.index + 1}_IP"
   location            = module.common.resource_group_location
@@ -175,8 +174,7 @@ resource "azurerm_public_ip" "public-ip-lb" {
 }
 
 resource "azurerm_lb" "frontend-lb" {
-  //  depends_on = [
-  //    azurerm_public_ip.public-ip-lb]
+  depends_on          = [azurerm_public_ip.public-ip-lb]
   name                = "frontend-lb"
   location            = module.common.resource_group_location
   resource_group_name = module.common.resource_group_name

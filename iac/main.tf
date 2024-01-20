@@ -256,13 +256,13 @@ resource "azurerm_virtual_machine" "mgmt-vm-instance" {
     admin_username = module.common.admin_username
     admin_password = module.common.admin_password
     custom_data = templatefile("${path.module}/cloud-init.sh", {
-      installation_type              = module.common.installation_type
-      allow_upload_download          = module.common.allow_upload_download
-      os_version                     = module.common.os_version
-      template_name                  = module.common.template_name
-      template_version               = module.common.template_version
-      template_type                  = "terraform"
-      is_blink                       = module.common.is_blink
+      installation_type     = module.common.installation_type
+      allow_upload_download = module.common.allow_upload_download
+      os_version            = module.common.os_version
+      template_name         = module.common.template_name
+      template_version      = module.common.template_version
+      template_type         = "terraform"
+      is_blink              = module.common.is_blink
       # bootstrap_script64             = base64encode("clish -c 'set user admin shell /bin/bash' -s;config_system -s 'install_security_gw=false&install_ppak=false&gateway_cluster_member=false&install_security_managment=true&install_mgmt_primary=true&install_mgmt_secondary=false&download_info=true&hostname=${var.mgmt_name}&mgmt_gui_clients_radio=any&mgmt_admin_radio=gaia_admin&maintenance_hash=${var.maintenance_mode_password_hash}'")
       bootstrap_script64             = ""
       location                       = module.common.resource_group_location
