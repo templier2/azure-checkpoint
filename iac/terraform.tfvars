@@ -12,9 +12,9 @@ address_space                  = "10.0.0.0/16"
 subnet_prefix                  = "10.0.0.0/24"
 management_GUI_client_network  = "0.0.0.0/0"
 mgmt_enable_api                = "all"
-admin_username                 = "admin"
+admin_username                 = ""
 admin_password                 = ""
-vm_size                        = "Standard_D3_v2"
+vm_size                        = "Standard_D2_v2"
 disk_size                      = "110"
 vm_os_sku                      = "mgmt-byol"
 vm_os_offer                    = "check-point-cg-r8120"
@@ -25,7 +25,8 @@ authentication_type            = "Password"
 admin_shell                    = "/bin/bash"
 serial_console_password_hash   = ""
 maintenance_mode_password_hash = ""
-# Single Gateway VARIABLES
+delay                          = "15m"
+######  Single Gateway VARIABLES ######
 single_gateway_name           = "checkpoint-single-terraform"
 gw_vnet_name                  = "Single_GW_vNet"
 gw_address_space              = "172.16.0.0/24"
@@ -39,7 +40,7 @@ enable_custom_metrics         = "true"
 sic_key                       = ""
 smart_1_cloud_token           = ""
 gw_netmask_length             = "27"
-# Cluster Gateway VARIABLES 
+######  Cluster Gateway VARIABLES #####
 ha_vnet_name                 = "vNet_Cluster"
 ha_address_space             = "192.168.0.0/24"
 ha_subnet_prefixes           = ["192.168.0.32/27", "192.168.0.64/27"]
@@ -50,7 +51,10 @@ existing_public_ip_prefix_id = ""
 enable_floating_ip           = "false"
 availability_type            = "Availability Zone"
 number_of_vm_instances       = 2
-ha_vm_size                   = "Standard_DS2_v2"
+ha_vm_size                   = "Standard_D2_v2"
 ha_disk_size                 = 110
 smart_1_cloud_token_a        = "AAAAAAA"
 smart_1_cloud_token_b        = "BBBBBBB"
+###### Ubuntu configuration #####
+ubuntu_user     = ""
+ubuntu_password = ""

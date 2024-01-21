@@ -1,6 +1,6 @@
 //********************** Networking **************************//
 module "gw-vnet" {
-  source     = "../modules/vnet"
+  source = "../modules/vnet"
 
   vnet_name           = var.gw_vnet_name
   resource_group_name = module.common.resource_group_name

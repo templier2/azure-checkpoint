@@ -8,6 +8,27 @@ variable "second_frontend_subnet_prefix" {
   type        = string
 }
 
+variable "delay" {
+  description = "Time required to wait before configuration of Management server"
+  type        = string
+}
+
+variable "ubuntu_user" {
+  description = "Ubuntu username"
+  type        = string
+}
+
+variable "ubuntu_password" {
+  description = "Ubuntu password"
+  type        = string
+}
+
+variable "ubuntu_size" {
+  description = "Ubuntu vm size"
+  default     = "Standard_B1ls"
+  type        = string
+}
+
 resource "azurerm_subnet" "apache" {
   depends_on = [
     azurerm_virtual_machine.vm-instance-availability-zone,
@@ -66,49 +87,45 @@ resource "azurerm_subnet_route_table_association" "ha_subnet3" {
   route_table_id = azurerm_route_table.ha_subnet3.id
 }
 
-resource "azurerm_virtual_machine" "apache" {
-  depends_on = [
-    azurerm_virtual_machine.vm-instance-availability-zone,
-    azurerm_virtual_machine.vm-instance-availability-set,
-    azurerm_virtual_machine.single-gateway-vm-instance
-  ]
-  count                         = 2
-  name                          = "apache${count.index + 1}"
-  location                      = module.common.resource_group_location
-  resource_group_name           = module.common.resource_group_name
-  vm_size                       = "Standard_B1ls"
-  network_interface_ids         = [azurerm_network_interface.apache[count.index].id]
-  delete_os_disk_on_termination = true
-
-  storage_image_reference {
-    publisher = "bitnami"
-    offer     = "tom-cat"
-    sku       = "7-0"
-    version   = "latest"
-  }
-  storage_os_disk {
-    name              = "myosdisk1"
-    caching           = "ReadWrite"
-    create_option     = "FromImage"
-    managed_disk_type = "Standard_LRS"
-  }
-  os_profile {
-    computer_name  = "apache${count.index + 1}"
-    admin_username = "${var.admin_username}-user"
-    admin_password = var.admin_password
-  }
-  os_profile_linux_config {
-    disable_password_authentication = false
-  }
-}
-
-resource "null_resource" "mgmt_import_gw" {
+resource "time_sleep" "configuration_pause" {
   depends_on = [
     azurerm_virtual_machine.vm-instance-availability-zone,
     azurerm_virtual_machine.vm-instance-availability-set,
     azurerm_virtual_machine.single-gateway-vm-instance,
     azurerm_virtual_machine.mgmt-vm-instance
   ]
+
+  create_duration = var.delay
+}
+
+resource "azurerm_linux_virtual_machine" "apache" {
+  count                           = 2
+  name                            = "apache${count.index + 1}"
+  location                        = module.common.resource_group_location
+  resource_group_name             = module.common.resource_group_name
+  size                            = var.ubuntu_size
+  admin_username                  = var.ubuntu_user
+  admin_password                  = var.ubuntu_password
+  disable_password_authentication = false
+  network_interface_ids = [
+    azurerm_network_interface.apache[count.index].id,
+  ]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
+}
+
+resource "null_resource" "mgmt_import_gw" {
+  depends_on = [time_sleep.configuration_pause]
   connection {
     type     = "ssh"
     host     = azurerm_public_ip.public-ip.ip_address
